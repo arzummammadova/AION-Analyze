@@ -1,4 +1,3 @@
-// src/app/components/FileUploadForm.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -34,7 +33,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => {
   const handleSubmit = async () => {
     if (!selectedFile) {
       setError('Zəhmət olmasa, bir fayl seçin.');
-      onResponse({ status: 'error', message: 'Zəhmət olmasa, bir fayl seçin.' }); // Ensure this matches AnalysisResult
+      // Ensure the error response matches the AnalysisResult type
+      onResponse({ status: 'error', message: 'Zəhmət olmasa, bir fayl seçin.' });
       return;
     }
 
@@ -49,7 +49,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => {
     }
 
     try {
-      const response = await axios.post<AnalysisResult>('http://localhost:5000/analyze', formData, { // Add <AnalysisResult> here
+      // Specify the expected response type for Axios
+      const response = await axios.post<AnalysisResult>('http://localhost:5000/analyze', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -59,12 +60,14 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => {
 
     } catch (err) {
       let errorMessage = 'Fayl yükləmə zamanı xəta baş verdi.';
+      // Default error response conforming to AnalysisResult
       let errorResponse: AnalysisResult = { status: 'error', message: errorMessage };
 
       if (axios.isAxiosError(err) && err.response) {
-        // Try to cast to AnalysisResult if the backend error structure matches
+        // Attempt to cast the backend error response to AnalysisResult if it fits the shape
         const backendError = err.response.data as AnalysisResult;
         errorMessage = backendError.message || backendError.error || errorMessage;
+        // Merge with backend error details, ensuring status is 'error'
         errorResponse = { ...backendError, status: 'error', message: errorMessage };
       }
       setError(errorMessage);
