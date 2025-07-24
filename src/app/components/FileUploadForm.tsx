@@ -50,7 +50,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => {
 
     try {
       // Specify the expected response type for Axios
-      const response = await axios.post<AnalysisResult>('https://aion-analyze-node-js.onrender.com//analyze', formData, {
+      const response = await axios.post<AnalysisResult>('https://aion-analyze-node-js.onrender.com/analyze', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
