@@ -1,22 +1,80 @@
+// src/app/page.tsx
 'use client';
 
 import { useState } from 'react';
 import FileUploadForm from './components/FileUploadForm';
 
-export default function Home() {
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+// Define the shape of your analysis result
+interface AnalysisResult {
+  status: string;
+  message: string;
+  error?: string; // Optional error message for failure
+  document_info?: {
+    filename: string;
+    word_count: number;
+    character_count: number;
+    analysis_time: string;
+    estimated_reading_time?: number;
+    headings?: string[];
+  };
+  ai_insights?: {
+    document_purpose?: string;
+    target_audience?: string;
+    summary?: string;
+    key_insights?: string[];
+  };
+  // Renamed from 'Youtube' to 'Youtube' to match common naming conventions
+  // and the original structure you likely intend for Q&A.
+  Youtube?: {
+    question: string;
+    answer: string;
+    confidence?: number;
+    reasoning?: string;
+  };
+  content_analysis?: {
+    topics?: {
+      dominant_topic: string;
+      word_frequency?: [string, number][];
+    };
+    sentiment?: {
+      overall: string;
+      confidence: number;
+    };
+    readability?: {
+      flesch_reading_ease: number;
+      difficulty: string;
+      grade_level: number;
+    };
+    key_information?: {
+      entities?: { text: string; label: string }[]; // Specific type for entities
+      dates?: string[];
+      emails?: string[];
+      urls?: string[];
+      phone_numbers?: string[];
+    };
+  };
+  recommendations?: string[];
+  metadata?: {
+    analysis_timestamp: string;
+    model_versions?: Record<string, string>;
+  };
+  analyzed_text?: string;
+}
 
-  const handleAnalysisResponse = (response: any) => {
+export default function Home() {
+  // Use AnalysisResult type here
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+
+  // Use AnalysisResult type here
+  const handleAnalysisResponse = (response: AnalysisResult) => {
     setAnalysisResult(response);
   };
-
-  
 
   const isSummaryQuestion = (question: string | null): boolean => {
     if (!question) return false;
     const lowerCaseQuestion = question.toLowerCase().trim();
     const summaryKeywords = [
-      'write short', 'qısa izah et', 'xülasə et', 'summarize', 
+      'write short', 'qısa izah et', 'xülasə et', 'summarize',
       'main topic', 'əsas mövzu', 'nədən söhbət gedir', 'şərh etsin', 'analiz et',
       'what is this document about', 'explain briefly', 'what is the purpose',
       'tell me about this document', 'document summary', 'give me a summary',
@@ -27,9 +85,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-5xl">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl"> {/* Reverted to max-w-2xl as per original */}
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          AION-File Sənəd Analiziii
+          AION-File Sənəd Analizi {/* Reverted to original title */}
         </h1>
         <p className="text-center text-gray-600 mb-8">
           Sənədi yükləyin və suallarınızı verin. Süni intellekt sənədi analiz edib sizə cavab verəcək.
@@ -43,7 +101,7 @@ export default function Home() {
             {analysisResult.status === 'success' ? (
               <>
                 <p className="text-green-600 font-medium mb-2">{analysisResult.message}</p>
-                
+
                 {analysisResult.document_info && (
                   <div className="mb-4 p-4 bg-blue-50 rounded-lg">
                     <h3 className="text-lg font-semibold text-blue-800 mb-2">Sənəd Məlumatı:</h3>
@@ -88,12 +146,13 @@ export default function Home() {
                   </div>
                 )}
 
+                {/* Changed 'Youtube' to 'Youtube' here */}
                 {analysisResult.Youtube && (
                   <div className="mb-4 p-4 bg-yellow-50 rounded-lg">
                     <h3 className="text-lg font-semibold text-yellow-800 mb-2">Sual-Cavab:</h3>
                     <p><strong>Sualınız:</strong> {analysisResult.Youtube.question}</p>
                     <p>
-                      <strong>Cavab:</strong> 
+                      <strong>Cavab:</strong>
                       {isSummaryQuestion(analysisResult.Youtube.question) && analysisResult.ai_insights?.summary
                         ? analysisResult.ai_insights.summary
                         : analysisResult.Youtube.answer}
@@ -132,7 +191,8 @@ export default function Home() {
                     {analysisResult.content_analysis.key_information && (
                       <>
                         {analysisResult.content_analysis.key_information.entities && analysisResult.content_analysis.key_information.entities.length > 0 && (
-                          <p><strong>Əsas Varlıqlar (NER):</strong> {analysisResult.content_analysis.key_information.entities.map((ent: any) => `${ent.text} (${ent.label})`).join(', ')}</p>
+                          // Removed 'any' here, using the type defined in AnalysisResult interface
+                          <p><strong>Əsas Varlıqlar (NER):</strong> {analysisResult.content_analysis.key_information.entities.map((ent: { text: string; label: string }) => `${ent.text} (${ent.label})`).join(', ')}</p>
                         )}
                         {analysisResult.content_analysis.key_information.dates && analysisResult.content_analysis.key_information.dates.length > 0 && (
                           <p><strong>Tarixlər:</strong> {analysisResult.content_analysis.key_information.dates.join(', ')}</p>

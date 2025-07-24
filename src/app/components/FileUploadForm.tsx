@@ -3,14 +3,17 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+// Import the AnalysisResult interface from your page.tsx file
+import { AnalysisResult } from '../page'; // Adjust the path if necessary
 
 interface FileUploadFormProps {
-  onResponse: (response: any) => void; 
+  // Use the imported AnalysisResult type here instead of 'any'
+  onResponse: (response: AnalysisResult) => void;
 }
 
-const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => { // <--- Fix is here!
+const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [question, setQuestion] = useState<string>(''); 
+  const [question, setQuestion] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +34,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => { // <
   const handleSubmit = async () => {
     if (!selectedFile) {
       setError('Zəhmət olmasa, bir fayl seçin.');
-      onResponse({ message: 'Zəhmət olmasa, bir fayl seçin.', status: 'error' }); 
+      onResponse({ status: 'error', message: 'Zəhmət olmasa, bir fayl seçin.' }); // Ensure this matches AnalysisResult
       return;
     }
 
@@ -42,25 +45,30 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => { // <
     formData.append('document', selectedFile);
 
     if (question.trim()) {
-      formData.append('question', question.trim()); 
+      formData.append('question', question.trim());
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/analyze', formData, {
+      const response = await axios.post<AnalysisResult>('http://localhost:5000/analyze', formData, { // Add <AnalysisResult> here
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      onResponse(response.data); 
+      onResponse(response.data);
 
     } catch (err) {
       let errorMessage = 'Fayl yükləmə zamanı xəta baş verdi.';
+      let errorResponse: AnalysisResult = { status: 'error', message: errorMessage };
+
       if (axios.isAxiosError(err) && err.response) {
-        errorMessage = err.response.data.message || err.response.data.error || errorMessage;
+        // Try to cast to AnalysisResult if the backend error structure matches
+        const backendError = err.response.data as AnalysisResult;
+        errorMessage = backendError.message || backendError.error || errorMessage;
+        errorResponse = { ...backendError, status: 'error', message: errorMessage };
       }
       setError(errorMessage);
-      onResponse({ message: `Xəta: ${errorMessage}`, status: 'error', error: errorMessage }); 
+      onResponse(errorResponse);
       console.error('Fayl yükləmə xətası:', err);
     } finally {
       setIsLoading(false);
@@ -85,7 +93,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({ onResponse }) => { // <
           Seçilən fayl: <span className="font-medium">{selectedFile.name}</span>
         </p>
       )}
-      
+
       <textarea
         value={question}
         onChange={handleQuestionChange}
