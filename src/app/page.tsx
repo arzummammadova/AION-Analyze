@@ -10,6 +10,8 @@ export default function Home() {
     setAnalysisResult(response);
   };
 
+  
+
   const isSummaryQuestion = (question: string | null): boolean => {
     if (!question) return false;
     const lowerCaseQuestion = question.toLowerCase().trim();
@@ -27,7 +29,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-5xl">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          AION-File Sənəd Analizi
+          AION-File Sənəd Analiziii
         </h1>
         <p className="text-center text-gray-600 mb-8">
           Sənədi yükləyin və suallarınızı verin. Süni intellekt sənədi analiz edib sizə cavab verəcək.
